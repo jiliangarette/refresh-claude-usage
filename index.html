@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Usage Refresh</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #06070d;
+    display: grid; place-items: center;
+    color: #eef1f8;
+  }
+  .aurora {
+    position: fixed; inset: -40%;
+    background:
+      radial-gradient(38% 42% at 28% 32%, rgba(124, 93, 250, .32), transparent 62%),
+      radial-gradient(34% 38% at 72% 62%, rgba(46, 196, 182, .26), transparent 60%),
+      radial-gradient(30% 36% at 60% 22%, rgba(255, 107, 158, .18), transparent 58%);
+    filter: blur(48px);
+    animation: drift 16s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    0%   { transform: rotate(0deg) scale(1); }
+    50%  { transform: rotate(7deg) scale(1.12); }
+    100% { transform: rotate(-6deg) scale(1.05); }
+  }
+  .stars { position: fixed; inset: 0; }
+  .stars i {
+    position: absolute; width: 3px; height: 3px; border-radius: 50%;
+    background: #fff; opacity: .12;
+    animation: twinkle 3.4s ease-in-out infinite;
+  }
+  @keyframes twinkle { 50% { opacity: .65; transform: scale(1.6); } }
+  .card {
+    position: relative; z-index: 2;
+    width: min(400px, calc(100vw - 40px));
+    padding: 52px 40px 44px;
+    border-radius: 26px; text-align: center;
+    background: rgba(15, 17, 27, .62);
+    border: 1px solid rgba(255, 255, 255, .09);
+    backdrop-filter: blur(22px);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255,255,255,.07);
+    animation: enter .8s cubic-bezier(.2, 1.4, .35, 1) both;
+  }
+  @keyframes enter { from { opacity: 0; transform: translateY(26px) scale(.94); } }
+  .stage { position: relative; width: 132px; height: 132px; margin: 0 auto 26px; }
+  .ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+  .ring .track { stroke: rgba(255,255,255,.08); }
+  .ring .arc {
+    stroke: url(#grad);
+    stroke-dasharray: 100 260;
+    animation: chase 1.3s cubic-bezier(.55,.15,.45,.85) infinite;
+  }
+  @keyframes chase { to { stroke-dashoffset: -360; } }
+  .orbit { position: absolute; inset: -14px; animation: spin 3.2s linear infinite; }
+  .orbit b {
+    position: absolute; top: 0; left: 50%; width: 9px; height: 9px; margin-left: -4px;
+    border-radius: 50%; background: #9d8cff;
+    box-shadow: 0 0 14px 3px rgba(157, 140, 255, .8);
+  }
+  .orbit.o2 { animation-duration: 5.1s; animation-direction: reverse; inset: -26px; }
+  .orbit.o2 b { background: #4fd8c6; box-shadow: 0 0 12px 3px rgba(79, 216, 198, .7); width: 6px; height: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .core {
+    position: absolute; inset: 26px; border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, #b7a8ff, #6c4ee0 58%, #2c1c6b);
+    box-shadow: 0 0 46px 8px rgba(124, 93, 250, .45), inset 0 -8px 22px rgba(0,0,0,.45);
+    display: grid; place-items: center; font-size: 34px;
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+  @keyframes breathe { 50% { transform: scale(1.07); box-shadow: 0 0 64px 14px rgba(124,93,250,.6), inset 0 -8px 22px rgba(0,0,0,.45); } }
+  .check { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; }
+  .check svg { width: 74px; height: 74px; }
+  .check path {
+    fill: none; stroke: #fff; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 90; stroke-dashoffset: 90;
+  }
+  h1 { font-size: 21px; font-weight: 650; letter-spacing: .2px; margin-bottom: 10px; transition: all .4s; }
+  p  { font-size: 14.5px; line-height: 1.65; color: #a6afc4; transition: all .4s; }
+  .dots span { animation: blink 1.4s infinite; }
+  .dots span:nth-child(2) { animation-delay: .2s; }
+  .dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%, 60%, 100% { opacity: .2; } 30% { opacity: 1; } }
+  .badge {
+    display: inline-block; margin-top: 22px; padding: 7px 16px;
+    font-size: 12px; letter-spacing: .8px; text-transform: uppercase;
+    color: #8f9ab2; border: 1px solid rgba(255,255,255,.1); border-radius: 999px;
+    background: rgba(255,255,255,.03);
+  }
+  .done .arc { animation: none; opacity: 0; transition: opacity .3s; }
+  .done .orbit { animation-play-state: paused; opacity: 0; transition: opacity .5s; }
+  .done .core {
+    animation: pop .55s cubic-bezier(.2, 1.6, .4, 1) both;
+    background: radial-gradient(circle at 34% 30%, #7be3a8, #1fae62 60%, #0b5e33);
+    box-shadow: 0 0 56px 12px rgba(46, 204, 113, .5), inset 0 -8px 22px rgba(0,0,0,.4);
+  }
+  @keyframes pop { 0% { transform: scale(.7); } 65% { transform: scale(1.14); } 100% { transform: scale(1); } }
+  .done .core .emoji { display: none; }
+  .done .check { opacity: 1; transition: opacity .2s .15s; }
+  .done .check path { animation: draw .5s .2s ease-out forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .fail .core {
+    background: radial-gradient(circle at 34% 30%, #ffb199, #e0563e 60%, #6b1c10);
+    box-shadow: 0 0 48px 10px rgba(224, 86, 62, .5), inset 0 -8px 22px rgba(0,0,0,.4);
+    animation: shake .5s ease both;
+  }
+  @keyframes shake { 20%,60% { transform: translateX(-7px); } 40%,80% { transform: translateX(7px); } }
+  .burst { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+  .burst i {
+    position: absolute; top: 50%; left: 50%; width: 7px; height: 7px; border-radius: 2px;
+    opacity: 0; animation: fly 1s cubic-bezier(.1, .8, .3, 1) forwards;
+  }
+  @keyframes fly {
+    0%   { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(560deg) scale(.4); }
+  }
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+<div class="stars" id="stars"></div>
+<div class="card" id="card">
+  <div class="stage" id="stage">
+    <svg class="ring" viewBox="0 0 132 132">
+      <defs>
+        <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#9d8cff"/><stop offset="100%" stop-color="#4fd8c6"/>
+        </linearGradient>
+      </defs>
+      <circle class="track" cx="66" cy="66" r="60"/>
+      <circle class="arc" cx="66" cy="66" r="60"/>
+    </svg>
+    <div class="orbit"><b></b></div>
+    <div class="orbit o2"><b></b></div>
+    <div class="core"><span class="emoji">⚡</span></div>
+    <div class="check"><svg viewBox="0 0 60 60"><path d="M14 32 L26 44 L47 18"/></svg></div>
+  </div>
+  <h1 id="title">Waking the fleet<span class="dots"><span>.</span><span>.</span><span>.</span></span></h1>
+  <p id="msg">Pinging JARVIS for fresh usage numbers across all Claude accounts and Codex.</p>
+  <div class="badge">jarvis bridge · usage telemetry</div>
+</div>
+<div class="burst" id="burst"></div>
+<script>
+const stars = document.getElementById('stars');
+for (let i = 0; i < 46; i++) {
+  const s = document.createElement('i');
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 100 + '%';
+  s.style.animationDelay = (Math.random() * 3.4).toFixed(2) + 's';
+  s.style.transform = 'scale(' + (0.4 + Math.random()).toFixed(2) + ')';
+  stars.appendChild(s);
+}
+const confetti = () => {
+  const b = document.getElementById('burst');
+  const colors = ['#9d8cff', '#4fd8c6', '#ffd166', '#ff6b9e', '#7be3a8'];
+  for (let i = 0; i < 34; i++) {
+    const p = document.createElement('i');
+    const a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 160;
+    p.style.setProperty('--dx', Math.cos(a) * d + 'px');
+    p.style.setProperty('--dy', Math.sin(a) * d - 40 + 'px');
+    p.style.background = colors[i % colors.length];
+    p.style.animationDelay = (Math.random() * .15).toFixed(2) + 's';
+    b.appendChild(p);
+  }
+};
+const done = (ok) => {
+  const card = document.getElementById('card');
+  if (ok) {
+    card.classList.add('done');
+    confetti();
+    document.getElementById('title').textContent = 'Fleet report requested';
+    document.getElementById('msg').textContent = 'A fresh usage card is on its way to Lark — should land in a few seconds. This tab will close itself.';
+    setTimeout(() => window.close(), 3200);
+  } else {
+    card.classList.add('fail');
+    document.getElementById('title').textContent = 'Couldn’t reach the bridge';
+    document.getElementById('msg').textContent = 'The refresh signal didn’t get through. Check your connection and tap the button in Lark again.';
+  }
+};
+const t0 = Date.now();
+fetch('https://ntfy.sh/jarvis-usage-8f3kq-9zm2w-trigger', { method: 'POST', body: 'usage' })
+  .then((r) => setTimeout(() => done(r.ok), Math.max(0, 1400 - (Date.now() - t0))))
+  .catch(() => setTimeout(() => done(false), Math.max(0, 1400 - (Date.now() - t0))));
+</script>
+</body>
+</html>
